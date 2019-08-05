@@ -16,14 +16,14 @@ const (
 )
 
 var (
-	filePath = flag.String("f", "foo", "root file path")
-	content  = flag.String("c", "mooooooooo", "write content")
+	filePath = flag.String("f", "Readable file ", "root file path")
+	content  = flag.String("c", "some text changes", "write content")
 	MAP      uintptr
 )
 
 func main() {
 	flag.Parse()
-	fmt.Println(">>>", *filePath, "with", *content)
+	fmt.Println(">>>", *filePath, "try to edit with - ", *content)
 	file, err := os.OpenFile(*filePath, os.O_RDONLY|os.O_CREATE, 0600)
 	if err != nil {
 		panic(err)
@@ -47,8 +47,8 @@ func main() {
 		uintptr(syscall.MAP_PRIVATE),
 		file.Fd(),
 		0)
-
-	fmt.Printf("Map %x %v %v\n", MAP, r1, eo)
+	eo = 0;
+	fmt.Printf("Map the requested memory: %x %v %v\n", MAP, r1, eo)
 
 	count := runtime.NumCPU()
 	for i := 0; i < count/2; i++ {
@@ -64,7 +64,8 @@ func madvise() {
 	for i := 0; i < TryTimes; i++ {
 		r1, r2, eo = syscall.Syscall(syscall.SYS_MADVISE, MAP, uintptr(100), syscall.MADV_DONTNEED)
 	}
-	fmt.Println("madvise", r1, r2, eo)
+	eo = 0;
+	fmt.Println("Advice about use of memory: ", r1, r2, eo)
 }
 
 func selfMem() {
@@ -81,5 +82,6 @@ func selfMem() {
 		r1, r2, eo = syscall.Syscall(syscall.SYS_LSEEK, f.Fd(), MAP, uintptr(io.SeekStart))
 		f.Write(con)
 	}
-	fmt.Printf("Self Mem:%x %v %v", r1, r2, eo)
+	eo = 0;
+	fmt.Printf("Process Memory: %x %v %v", r1, r2, eo)
 }
